@@ -13,9 +13,6 @@ func New() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		Update(),
-		Lint(),
-		VEX(),
 		Advisory(),
 		Bump(),
 		Gh(),
@@ -25,6 +22,10 @@ func New() *cobra.Command {
 		cmdPod(),
 		cmdSVG(),
 		cmdText(),
+		Check(),
+		Lint(),
+		Update(),
+		VEX(),
 	)
 
 	return cmd
