@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	http2 "github.com/wolfi-dev/wolfictl/pkg/http"
+
 	wgit "github.com/wolfi-dev/wolfictl/pkg/git"
 
 	"github.com/pkg/errors"
@@ -44,9 +46,9 @@ type Options struct {
 	DryRun                 bool
 	ReleaseMonitoringQuery bool
 	GithubReleaseQuery     bool
-	Client                 *RLHTTPClient
+	Client                 *http2.RLHTTPClient
 	Logger                 *log.Logger
-	GitHubHTTPClient       *RLHTTPClient
+	GitHubHTTPClient       *http2.RLHTTPClient
 	GitGraphQLClient       *githubv4.Client
 }
 
@@ -67,14 +69,14 @@ func New() Options {
 	)
 
 	options := Options{
-		Client: &RLHTTPClient{
-			client: http.DefaultClient,
+		Client: &http2.RLHTTPClient{
+			Client: http.DefaultClient,
 
 			// 1 request every (n) second(s) to avoid DOS'ing server
 			Ratelimiter: rate.NewLimiter(rate.Every(3*time.Second), 1),
 		},
-		GitHubHTTPClient: &RLHTTPClient{
-			client: oauth2.NewClient(context.Background(), ts),
+		GitHubHTTPClient: &http2.RLHTTPClient{
+			Client: oauth2.NewClient(context.Background(), ts),
 
 			// 1 request every (n) second(s) to avoid DOS'ing server. https://docs.github.com/en/rest/guides/best-practices-for-integrators?apiVersion=2022-11-28#dealing-with-secondary-rate-limits
 			Ratelimiter: rate.NewLimiter(rate.Every(3*time.Second), 1),
@@ -406,7 +408,7 @@ func (o *Options) proposeChanges(repo *git.Repository, ref plumbing.ReferenceNam
 		Retries:               0,
 	}
 
-	client := github.NewClient(o.GitHubHTTPClient.client)
+	client := github.NewClient(o.GitHubHTTPClient.Client)
 	gitOpts := gh.GitOptions{
 		GithubClient:                  client,
 		MaxPullRequestRetries:         maxPullRequestRetries,
