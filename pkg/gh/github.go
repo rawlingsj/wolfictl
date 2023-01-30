@@ -52,7 +52,7 @@ func New() GitOptions {
 }
 
 // checks if error codes returned from GitHub tell us we are being rate limited
-func (o *GitOptions) checkRateLimiting(githubErr error) (bool, time.Duration) {
+func (o GitOptions) checkRateLimiting(githubErr error) (bool, time.Duration) {
 	isRateLimited := false
 
 	var delay time.Duration
@@ -77,7 +77,7 @@ func (o *GitOptions) checkRateLimiting(githubErr error) (bool, time.Duration) {
 	return isRateLimited, delay
 }
 
-func (o *GitOptions) wait(delay time.Duration) {
+func (o GitOptions) wait(delay time.Duration) {
 	// If we couldn't determine a more accurate delay from GitHub API response headers, then fall back to our user-configurable default
 	if delay == 0 {
 		delay = time.Duration(o.SecondsToSleepWhenRateLimited * int(time.Second))

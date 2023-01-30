@@ -25,7 +25,7 @@ type GetPullRequest struct {
 }
 
 // OpenPullRequest opens a pull request on GitHub
-func (o *GitOptions) OpenPullRequest(pr *NewPullRequest) (string, error) {
+func (o GitOptions) OpenPullRequest(pr *NewPullRequest) (string, error) {
 	// if our new version is more recent that the existing PR close it and create a new one, otherwise skip
 
 	// If the current request has already exhausted the configured number of PR retries, short-circuit
@@ -65,7 +65,7 @@ func (o *GitOptions) OpenPullRequest(pr *NewPullRequest) (string, error) {
 }
 
 // CheckExistingPullRequests if an existing PR is open with the same version skip, if it's an older version close the PR and we'll create a new one
-func (o *GitOptions) CheckExistingPullRequests(pr *GetPullRequest) (string, error) {
+func (o GitOptions) CheckExistingPullRequests(pr *GetPullRequest) (string, error) {
 	// check if there's an existing PR open for the same package
 	openPullRequests, resp, err := o.GithubClient.PullRequests.List(context.Background(), pr.Owner, pr.RepoName, &github.PullRequestListOptions{State: "open"})
 
@@ -109,7 +109,7 @@ func (o *GitOptions) CheckExistingPullRequests(pr *GetPullRequest) (string, erro
 	return "", nil
 }
 
-func (o *GitOptions) closePullRequest(pr *GetPullRequest, openPr *github.PullRequest) error {
+func (o GitOptions) closePullRequest(pr *GetPullRequest, openPr *github.PullRequest) error {
 	closed := "closed"
 	openPr.State = &closed
 
@@ -132,7 +132,7 @@ func (o *GitOptions) closePullRequest(pr *GetPullRequest, openPr *github.PullReq
 }
 
 // a matching pull request will have a title in the form of "package_name/v1.2.3 package update"
-func (o *GitOptions) isPullRequestOldVersion(packageName, packageVersion, prTitle string) bool {
+func (o GitOptions) isPullRequestOldVersion(packageName, packageVersion, prTitle string) bool {
 	if strings.HasPrefix(prTitle, fmt.Sprintf("%s/", packageName)) {
 		parts := strings.SplitAfter(prTitle, fmt.Sprintf("%s/", packageName))
 		if len(parts) != 2 {

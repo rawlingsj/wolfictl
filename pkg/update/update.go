@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -386,23 +385,14 @@ func (o *Options) switchBranch(repo *git.Repository) (plumbing.ReferenceName, er
 
 // commits package update changes and creates a pull request
 func (o *Options) proposeChanges(repo *git.Repository, ref plumbing.ReferenceName, packageName, newVersion string) (string, error) {
-	remote, err := repo.Remote("origin")
-	if err != nil {
-		return "", fmt.Errorf("failed to find git origin URL: %w", err)
-	}
-
-	if len(remote.Config().URLs) == 0 {
-		return "", fmt.Errorf("no remote config URLs found for remote origin")
-	}
-
-	owner, repoName, err := parseGitURL(remote.Config().URLs[0])
+	gitURL, err := wgit.GetRemoteURL(repo)
 	if err != nil {
 		return "", fmt.Errorf("failed to find git origin URL: %w", err)
 	}
 
 	basePullRequest := gh.BasePullRequest{
-		RepoName:              repoName,
-		Owner:                 owner,
+		RepoName:              gitURL.Name,
+		Owner:                 gitURL.Organisation,
 		Branch:                ref.String(),
 		PullRequestBaseBranch: o.PullRequestBaseBranch,
 		Retries:               0,
@@ -495,17 +485,4 @@ func (o *Options) commitChanges(repo *git.Repository, packageName, latestVersion
 		return fmt.Errorf("failed to git commit: %w", err)
 	}
 	return nil
-}
-
-// parseGitURL returns owner, repo name, errors
-func parseGitURL(rawURL string) (owner, repo string, err error) {
-	rawURL = strings.TrimSuffix(rawURL, ".git")
-
-	parsedURL, err := url.Parse(rawURL)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to parse git url %s: %w", rawURL, err)
-	}
-
-	parts := strings.Split(parsedURL.Path, "/")
-	return parts[1], parts[2], nil
 }
