@@ -15,9 +15,10 @@ Lint the code
 ### Options
 
 ```
-  -h, --help      help for lint
-  -l, --list      prints the all of available rules and exits
-  -v, --verbose   verbose output
+  -h, --help                    help for lint
+  -l, --list                    prints the all of available rules and exits
+      --skip-rule stringArray   list of rules to skip
+  -v, --verbose                 verbose output
 ```
 
 ### SEE ALSO
